@@ -1,11 +1,11 @@
 #!/bin/bash
 
-#Usage: htocpp.sh [-q] header.h
+#Usage: htocpp.sh [-q] header_file
 
 #This script will create a "skeleton" C++ source file (.cpp) from a given
-#header file (.h). Note it does not add includes or names for the parameters
-#and currently does not account for static or const modifiers though it warns
-#you when one is found.
+#header file. Note it does not add includes (other than the header file) or 
+#names for the parameters and currently does not account for static or const 
+#modifiers though it warns you when one is found.
 
 #Exit codes:
 #0: command successful
@@ -25,7 +25,6 @@ else
 fi
 
 #check for the correct number of args
-#if (( $# > 1 || $# == 0 ))
 if (( $# == 0 ))
 then
     if [ ! $quiet ]
@@ -80,6 +79,9 @@ do
 
     IFS=$'\n'
 
+    echo  "#include \"$headerFile\"" >> $sourceFile #add the #include "myFile.hpp"
+    echo  >> $sourceFile
+
     for line in $headerLines
     do
         constructor=false
@@ -116,7 +118,8 @@ do
         
         #get the paramerters and finish building the line 
         params=$( echo "$line" | cut -d'(' -f2 | cut -d')' -f1 )
-        sourceLine=$sourceLine$params\){
+        sourceLine=$sourceLine$params\)
+        #sourceLine=$sourceLine$params\){   #option for having opening braces on same line
 
         if [ ! $quiet ]
         then
@@ -124,8 +127,9 @@ do
         fi
 
         echo $sourceLine >> "$sourceFile"
+        echo "{" >> $sourceFile #remove if doing opening braces on same line
         echo  >> $sourceFile
-        echo } >> $sourceFile
+        echo "}" >> $sourceFile
         echo  >> $sourceFile
 
     done
